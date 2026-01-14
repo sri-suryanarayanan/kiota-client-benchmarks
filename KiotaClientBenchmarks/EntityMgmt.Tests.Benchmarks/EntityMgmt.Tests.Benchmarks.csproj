@@ -17,15 +17,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="BenchmarkDotNet" />
-
     <!--<PackageReference Include="Aveva.Platform.EntityMgmt.Client" />-->
-
     <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" />
     <PackageReference Include="Microsoft.Kiota.Serialization.Json" />
     <PackageReference Include="Microsoft.Kiota.Abstractions" />
-
-    <PackageReference Include="Microsoft.Kiota.Serialization.Form" />
-    <PackageReference Include="Microsoft.Kiota.Serialization.Multipart" />
-    <PackageReference Include="Microsoft.Kiota.Serialization.Text" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
   </ItemGroup>
 </Project>

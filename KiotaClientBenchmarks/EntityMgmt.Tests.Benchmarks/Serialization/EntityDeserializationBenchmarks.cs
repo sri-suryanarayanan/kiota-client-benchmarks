@@ -78,7 +78,7 @@ public class EntityDeserializationBenchmarks
 
     #region Simple Entity Benchmarks
 
-    [Benchmark(Description = "Simple Entity - System.Text.Json")]
+    [Benchmark(Description = "Simple Entity - System.Text.Json", Baseline = true)]
     [BenchmarkCategory("Simple")]
     public Entity DeserializeSimpleEntity_SystemTextJson()
     {
@@ -96,7 +96,7 @@ public class EntityDeserializationBenchmarks
 
     #region Complex Entity Benchmarks
 
-    [Benchmark(Description = "Complex Entity - System.Text.Json")]
+    [Benchmark(Description = "Complex Entity - System.Text.Json", Baseline = true)]
     [BenchmarkCategory("Complex")]
     public Entity DeserializeComplexEntity_SystemTextJson()
     {
@@ -114,7 +114,7 @@ public class EntityDeserializationBenchmarks
 
     #region Bulk Entity Benchmarks
 
-    [Benchmark(Description = "Bulk Entities (10) - System.Text.Json")]
+    [Benchmark(Description = "Bulk Entities (10) - System.Text.Json", Baseline = true)]
     [BenchmarkCategory("Bulk-10")]
     public BulkEntities DeserializeBulkEntities10_SystemTextJson()
     {
@@ -128,7 +128,7 @@ public class EntityDeserializationBenchmarks
         return (await KiotaJsonSerializer.DeserializeAsync(_bulkEntities10Json, BulkEntities.CreateFromDiscriminatorValue))!;
     }
 
-    [Benchmark(Description = "Bulk Entities (100) - System.Text.Json")]
+    [Benchmark(Description = "Bulk Entities (100) - System.Text.Json", Baseline = true)]
     [BenchmarkCategory("Bulk-100")]
     public BulkEntities DeserializeBulkEntities100_SystemTextJson()
     {
@@ -146,7 +146,7 @@ public class EntityDeserializationBenchmarks
 
     #region Response Type Benchmarks
 
-    [Benchmark(Description = "EntityResponse - System.Text.Json")]
+    [Benchmark(Description = "EntityResponse - System.Text.Json", Baseline = true)]
     [BenchmarkCategory("Response")]
     public EntityResponse DeserializeEntityResponse_SystemTextJson()
     {

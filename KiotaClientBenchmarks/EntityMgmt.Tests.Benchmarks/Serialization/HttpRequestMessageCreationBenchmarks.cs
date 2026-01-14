@@ -101,7 +101,7 @@ public class HttpRequestMessageCreationBenchmarks
 
     #region Bulk Entity POST
 
-    [Benchmark(Description = "POST Bulk - Manual HttpRequestMessage")]
+    [Benchmark(Description = "POST Bulk - Manual HttpRequestMessage", Baseline = true)]
     [BenchmarkCategory("POST-Bulk")]
     public HttpRequestMessage CreateBulkPostRequest_Manual()
     {
@@ -131,7 +131,7 @@ public class HttpRequestMessageCreationBenchmarks
 
     #region PUT Entity
 
-    [Benchmark(Description = "PUT Entity - Manual HttpRequestMessage")]
+    [Benchmark(Description = "PUT Entity - Manual HttpRequestMessage", Baseline = true)]
     [BenchmarkCategory("PUT")]
     public HttpRequestMessage CreatePutRequest_Manual()
     {
@@ -161,7 +161,7 @@ public class HttpRequestMessageCreationBenchmarks
 
     #region GET Entity
 
-    [Benchmark(Description = "GET Entity - Manual HttpRequestMessage")]
+    [Benchmark(Description = "GET Entity - Manual HttpRequestMessage", Baseline = true)]
     [BenchmarkCategory("GET")]
     public HttpRequestMessage CreateGetRequest_Manual()
     {
@@ -185,7 +185,7 @@ public class HttpRequestMessageCreationBenchmarks
 
     #region With Headers
 
-    [Benchmark(Description = "POST with Headers - Manual")]
+    [Benchmark(Description = "POST with Headers - Manual", Baseline = true)]
     [BenchmarkCategory("Headers")]
     public HttpRequestMessage CreatePostWithHeaders_Manual()
     {
