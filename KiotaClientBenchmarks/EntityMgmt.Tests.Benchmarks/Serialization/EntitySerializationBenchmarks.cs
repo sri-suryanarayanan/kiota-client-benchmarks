@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Aveva.Platform.EntityMgmt.Client.Api.Models;
 using Aveva.Platform.EntityMgmt.Tests.Benchmarks.Helpers;
-using Aveva.Platform.EntityMgmt.Tests.Benchmarks.Serialization.CustomSerializers;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Order;
@@ -30,6 +29,8 @@ public class EntitySerializationBenchmarks
     private BulkEntities _bulkEntities10 = null!;
     private BulkEntities _bulkEntities100 = null!;
     private JsonSerializerOptions _systemTextJsonOptions = null!;
+    private ISerializationWriterFactory _writerFactory = null!;
+
 
     [GlobalSetup]
     public void Setup()
@@ -64,6 +65,8 @@ public class EntitySerializationBenchmarks
             Items = [.. Enumerable.Range(0, 100).Select(i =>
             new EntityBuilder().WithId($"bulk-entity-{i}").WithName($"Bulk Entity {i}").BuildEntityRequest())],
         };
+
+        _writerFactory = new JsonSerializationWriterFactory();
     }
 
     #region Simple Entity Benchmarks
@@ -77,29 +80,29 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Simple - Kiota (Standard)")]
     [BenchmarkCategory("Simple")]
-    public async Task<string> SerializeSimpleEntity_Kiota()
+    public string SerializeSimpleEntity_Kiota()
     {
-        return await KiotaJsonSerializer.SerializeAsStringAsync(_simpleEntity);
+        // Make synchronous to avoid async overhead variations
+        return KiotaJsonSerializer.SerializeAsStringAsync(_simpleEntity).GetAwaiter().GetResult();
     }
 
-    [Benchmark(Description = "Simple - Kiota (RecyclableMemoryStream)")]
+
+    [Benchmark(Description = "Simple - Kiota (writer only)")]
     [BenchmarkCategory("Simple")]
-    public string SerializeSimpleEntity_KiotaRecyclable()
+    public string SerializeSimpleEntity_WithKiotaJsonWriter()
     {
-        using var writer = new JsonSerializationWriterRecyclable();
-        // Use WriteObjectValue to properly wrap the entity in an object
+        using var writer = new JsonSerializationWriter();
         writer.WriteObjectValue(null, _simpleEntity);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    [Benchmark(Description = "Simple - Kiota (ArrayPool)")]
+    [Benchmark(Description = "Simple - Kiota (with writer factory)")]
     [BenchmarkCategory("Simple")]
-    public string SerializeSimpleEntity_KiotaArrayPool()
+    public string SerializeSimpleEntity_WithKiotaJsonWriterFactory()
     {
-        using var writer = new JsonSerializationWriterArrayPool();
-        // Use WriteObjectValue to properly wrap the entity in an object
+        using var writer = _writerFactory.GetSerializationWriter("application/json");
         writer.WriteObjectValue(null, _simpleEntity);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
@@ -124,22 +127,22 @@ public class EntitySerializationBenchmarks
         return await KiotaJsonSerializer.SerializeAsStringAsync(_complexEntity);
     }
 
-    [Benchmark(Description = "Complex - Kiota (RecyclableMemoryStream)")]
+    [Benchmark(Description = "Complex - Kiota (writer only)")]
     [BenchmarkCategory("Complex")]
-    public string SerializeComplexEntity_KiotaRecyclable()
+    public string SerializeComplexEntity_KiotaJsonWriter()
     {
-        using var writer = new JsonSerializationWriterRecyclable();
+        using var writer = new JsonSerializationWriter();
         writer.WriteObjectValue(null, _complexEntity);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    [Benchmark(Description = "Complex - Kiota (ArrayPool)")]
+    [Benchmark(Description = "Complex - Kiota (with writer factory)")]
     [BenchmarkCategory("Complex")]
-    public string SerializeComplexEntity_KiotaArrayPool()
+    public string SerializeComplexEntity_KiotaJsonWriterFactory()
     {
-        using var writer = new JsonSerializationWriterArrayPool();
+        using var writer = _writerFactory.GetSerializationWriter("application/json");
         writer.WriteObjectValue(null, _complexEntity);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
@@ -159,27 +162,27 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Bulk(10) - Kiota (Standard)")]
     [BenchmarkCategory("Bulk-10")]
-    public async Task<string> SerializeBulkEntities10_Kiota()
+    public string SerializeBulkEntities10_Kiota()
     {
-        return await KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities10);
+        return KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities10).GetAwaiter().GetResult();
     }
 
-    [Benchmark(Description = "Bulk(10) - Kiota (RecyclableMemoryStream)")]
+    [Benchmark(Description = "Bulk(10) - Kiota (writer only)")]
     [BenchmarkCategory("Bulk-10")]
-    public string SerializeBulkEntities10_KiotaRecyclable()
+    public string SerializeBulkEntities10_KiotaJsonWriter()
     {
-        using var writer = new JsonSerializationWriterRecyclable();
+        using var writer = new JsonSerializationWriter();
         writer.WriteObjectValue(null, _bulkEntities10);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    [Benchmark(Description = "Bulk(10) - Kiota (ArrayPool)")]
+    [Benchmark(Description = "Bulk(10) - Kiota (with writer factory)")]
     [BenchmarkCategory("Bulk-10")]
-    public string SerializeBulkEntities10_KiotaArrayPool()
+    public string SerializeBulkEntities10_KiotaJsonWriterFactory()
     {
-        using var writer = new JsonSerializationWriterArrayPool();
+        using var writer = _writerFactory.GetSerializationWriter("application/json");
         writer.WriteObjectValue(null, _bulkEntities10);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
@@ -199,27 +202,27 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Bulk(100) - Kiota (Standard)")]
     [BenchmarkCategory("Bulk-100")]
-    public async Task<string> SerializeBulkEntities100_Kiota()
+    public string SerializeBulkEntities100_Kiota()
     {
-        return await KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities100);
+        return KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities100).GetAwaiter().GetResult();
     }
 
-    [Benchmark(Description = "Bulk(100) - Kiota (RecyclableMemoryStream)")]
+    [Benchmark(Description = "Bulk(100) - Kiota (writer only)")]
     [BenchmarkCategory("Bulk-100")]
-    public string SerializeBulkEntities100_KiotaRecyclable()
+    public string SerializeBulkEntities100_KiotaJsonWriter()
     {
-        using var writer = new JsonSerializationWriterRecyclable();
+        using var writer = new JsonSerializationWriter();
         writer.WriteObjectValue(null, _bulkEntities100);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
     }
 
-    [Benchmark(Description = "Bulk(100) - Kiota (ArrayPool)")]
+    [Benchmark(Description = "Bulk(100) - Kiota (with writer factory)")]
     [BenchmarkCategory("Bulk-100")]
-    public string SerializeBulkEntities100_KiotaArrayPool()
+    public string SerializeBulkEntities100_KiotaJsonWriterFactory()
     {
-        using var writer = new JsonSerializationWriterArrayPool();
+        using var writer = _writerFactory.GetSerializationWriter("application/json");
         writer.WriteObjectValue(null, _bulkEntities100);
         using var stream = writer.GetSerializedContent();
         using var reader = new StreamReader(stream);

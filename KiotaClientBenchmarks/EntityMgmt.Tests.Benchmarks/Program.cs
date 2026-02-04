@@ -5,6 +5,7 @@ using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Loggers;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using Perfolizer.Horology;
 
 namespace Aveva.Platform.EntityMgmt.Tests.Benchmarks;
 
@@ -24,7 +25,7 @@ public static class Program
             .AddDiagnoser([.. DefaultConfig.Instance.GetDiagnosers()])
             //.AddExporter(HtmlExporter.Default)
             .AddExporter(MarkdownExporter.Default)
-            .WithSummaryStyle(SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend));
+            .WithSummaryStyle(SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend).WithTimeUnit(TimeUnit.Microsecond));
         BenchmarkSwitcher.FromAssembly(Assembly.GetExecutingAssembly()).Run(args, config);
     }
 }
