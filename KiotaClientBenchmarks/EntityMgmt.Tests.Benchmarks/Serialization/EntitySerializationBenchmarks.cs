@@ -7,6 +7,7 @@ using Aveva.Platform.EntityMgmt.Client.Api.Models;
 using Aveva.Platform.EntityMgmt.Tests.Benchmarks.Helpers;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Order;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Serialization;
@@ -19,6 +20,7 @@ namespace Aveva.Platform.EntityMgmt.Tests.Benchmarks.Serialization;
 /// Tests System.Text.Json, standard Kiota, Kiota with RecyclableMemoryStream, and Kiota with ArrayPool.
 /// </summary>
 [MemoryDiagnoser]
+[EventPipeProfiler(EventPipeProfile.GcVerbose)] // Detailed GC and allocation info
 [Orderer(SummaryOrderPolicy.Default)]
 [RankColumn]
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
@@ -80,10 +82,10 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Simple - Kiota (Standard)")]
     [BenchmarkCategory("Simple")]
-    public string SerializeSimpleEntity_Kiota()
+    public async Task<string> SerializeSimpleEntity_Kiota()
     {
         // Make synchronous to avoid async overhead variations
-        return KiotaJsonSerializer.SerializeAsStringAsync(_simpleEntity).GetAwaiter().GetResult();
+        return await KiotaJsonSerializer.SerializeAsStringAsync(_simpleEntity).ConfigureAwait(false);
     }
 
 
@@ -162,9 +164,9 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Bulk(10) - Kiota (Standard)")]
     [BenchmarkCategory("Bulk-10")]
-    public string SerializeBulkEntities10_Kiota()
+    public async Task<string> SerializeBulkEntities10_Kiota()
     {
-        return KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities10).GetAwaiter().GetResult();
+        return await KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities10).ConfigureAwait(false);
     }
 
     [Benchmark(Description = "Bulk(10) - Kiota (writer only)")]
@@ -202,9 +204,9 @@ public class EntitySerializationBenchmarks
 
     [Benchmark(Description = "Bulk(100) - Kiota (Standard)")]
     [BenchmarkCategory("Bulk-100")]
-    public string SerializeBulkEntities100_Kiota()
+    public async Task<string> SerializeBulkEntities100_Kiota()
     {
-        return KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities100).GetAwaiter().GetResult();
+        return await KiotaJsonSerializer.SerializeAsStringAsync(_bulkEntities100).ConfigureAwait(false);
     }
 
     [Benchmark(Description = "Bulk(100) - Kiota (writer only)")]
